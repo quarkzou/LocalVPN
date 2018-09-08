@@ -173,6 +173,7 @@ public class LocalVPNService extends VpnService
         {
             Log.i(TAG, "Started");
 
+            // vpnInput: app => vpn
             FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
             FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
 
