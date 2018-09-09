@@ -85,18 +85,32 @@ public class TCPOutput implements Runnable
 
                 String ipAndPort = destinationAddress.getHostAddress() + ":" +
                         destinationPort + ":" + sourcePort;
+                String tcpType = "";
                 TCB tcb = TCB.getTCB(ipAndPort);
-                if (tcb == null)
+                if (tcb == null) {
                     initializeConnection(ipAndPort, destinationAddress, destinationPort,
                             currentPacket, tcpHeader, responseBuffer);
-                else if (tcpHeader.isSYN())
+                    tcpType = "tcb";
+                }
+                else if (tcpHeader.isSYN()) {
                     processDuplicateSYN(tcb, tcpHeader, responseBuffer);
-                else if (tcpHeader.isRST())
+                    tcpType = "syn";
+                }
+                else if (tcpHeader.isRST()) {
                     closeCleanly(tcb, responseBuffer);
-                else if (tcpHeader.isFIN())
+                    tcpType = "rst";
+                }
+                else if (tcpHeader.isFIN()) {
                     processFIN(tcb, tcpHeader, responseBuffer);
-                else if (tcpHeader.isACK())
+                    tcpType = "fin";
+                }
+                else if (tcpHeader.isACK()) {
                     processACK(tcb, tcpHeader, payloadBuffer, responseBuffer);
+                    tcpType = "ack";
+                }
+
+                String sLog = String.format("[%s]%s", tcpType, ipAndPort);
+                Log.i("ZYDEBUG", sLog);
 
                 // XXX: cleanup later
                 if (responseBuffer.position() == 0)
