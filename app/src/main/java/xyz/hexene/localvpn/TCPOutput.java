@@ -92,25 +92,22 @@ public class TCPOutput implements Runnable
                             currentPacket, tcpHeader, responseBuffer);
                     tcpType = "tcb";
                 }
-                else if (tcpHeader.isSYN()) {
-                    processDuplicateSYN(tcb, tcpHeader, responseBuffer);
-                    tcpType = "syn";
+                else {
+                    if (tcpHeader.isSYN()) {
+                        processDuplicateSYN(tcb, tcpHeader, responseBuffer);
+                        tcpType = "syn";
+                    } else if (tcpHeader.isRST()) {
+                        closeCleanly(tcb, responseBuffer);
+                        tcpType = "rst";
+                    } else if (tcpHeader.isFIN()) {
+                        processFIN(tcb, tcpHeader, responseBuffer);
+                        tcpType = "fin";
+                    } else if (tcpHeader.isACK()) {
+                        processACK(tcb, tcpHeader, payloadBuffer, responseBuffer);
+                        tcpType = "ack";
+                    }
+                    Log.i(TAG, String.format("[%s] %s",tcpType, tcb.toString()));
                 }
-                else if (tcpHeader.isRST()) {
-                    closeCleanly(tcb, responseBuffer);
-                    tcpType = "rst";
-                }
-                else if (tcpHeader.isFIN()) {
-                    processFIN(tcb, tcpHeader, responseBuffer);
-                    tcpType = "fin";
-                }
-                else if (tcpHeader.isACK()) {
-                    processACK(tcb, tcpHeader, payloadBuffer, responseBuffer);
-                    tcpType = "ack";
-                }
-
-                String sLog = String.format("[%s]%s", tcpType, ipAndPort);
-                Log.i("ZYDEBUG", sLog);
 
                 // XXX: cleanup later
                 if (responseBuffer.position() == 0)
@@ -163,6 +160,7 @@ public class TCPOutput implements Runnable
                     tcb.status = TCBStatus.SYN_SENT;
                     selector.wakeup();
                     tcb.selectionKey = outputChannel.register(selector, SelectionKey.OP_CONNECT, tcb);
+                    Log.i(TAG, "[tcb] " + tcb.toString());
                     return;
                 }
             }

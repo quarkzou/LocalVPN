@@ -33,6 +33,11 @@ public class TCB
     public long myAcknowledgementNum, theirAcknowledgementNum;
     public TCBStatus status;
 
+    public String toString()
+    {
+       return String.format("%s, %d,%d,%d,%d, %s", ipAndPort, mySequenceNum, myAcknowledgementNum, theirSequenceNum, theirAcknowledgementNum, status.toString());
+    }
+
     // TCP has more states, but we need only these
     public enum TCBStatus
     {

@@ -40,6 +40,7 @@ public class LocalVPNService extends VpnService
     private static final String TAG = LocalVPNService.class.getSimpleName();
     private static final String VPN_ADDRESS = "10.0.0.2"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
+//    private static final String VPN_ROUTE = "10.35.142.113"; // Intercept everything
 
     public static final String BROADCAST_VPN_STATE = "xyz.hexene.localvpn.VPN_STATE";
 
@@ -96,7 +97,7 @@ public class LocalVPNService extends VpnService
         {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
-            builder.addRoute(VPN_ROUTE, 0);
+            builder.addRoute(VPN_ROUTE, 32);
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
         }
     }

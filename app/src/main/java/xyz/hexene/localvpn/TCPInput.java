@@ -88,6 +88,7 @@ public class TCPInput implements Runnable
     {
         TCB tcb = (TCB) key.attachment();
         Packet referencePacket = tcb.referencePacket;
+        Log.i(TAG, "[con] " + tcb.toString());
         try
         {
             if (tcb.channel.finishConnect())
@@ -123,6 +124,7 @@ public class TCPInput implements Runnable
         receiveBuffer.position(HEADER_SIZE);
 
         TCB tcb = (TCB) key.attachment();
+        Log.i(TAG, "[inp] " + tcb.toString());
         synchronized (tcb)
         {
             Packet referencePacket = tcb.referencePacket;
