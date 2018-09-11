@@ -19,6 +19,7 @@ package xyz.hexene.localvpn;
 import android.util.Log;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -165,7 +166,16 @@ public class TCPInput implements Runnable
                 referencePacket.updateTCPBuffer(receiveBuffer, (byte) (Packet.TCPHeader.PSH | Packet.TCPHeader.ACK),
                         tcb.mySequenceNum, tcb.myAcknowledgementNum, readBytes);
                 tcb.mySequenceNum += readBytes; // Next sequence number
+//                receiveBuffer.flip();
+//                try {
+//                    Packet p = new Packet(receiveBuffer);
+//                    Log.i(TAG, String.format("ZYDEBUG, remote=>vpn, size=%d, header=%s", readBytes, p.tcpHeader));
+//                } catch (UnknownHostException ex)
+//                {
+//                    ex.printStackTrace();
+//                }
                 receiveBuffer.position(HEADER_SIZE + readBytes);
+                Log.i(TAG, String.format("ZYDEBUG, remote=>vpn, size=%d", readBytes));
             }
         }
         outputQueue.offer(receiveBuffer);

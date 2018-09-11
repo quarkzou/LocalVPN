@@ -79,6 +79,13 @@ public class UDPInput implements Runnable
                         referencePacket.updateUDPBuffer(receiveBuffer, readBytes);
                         receiveBuffer.position(HEADER_SIZE + readBytes);
 
+//                        try {
+//                            Thread.sleep(10);
+//                        }
+//                        catch (InterruptedException ex)
+//                        {
+//                            ex.printStackTrace();
+//                        }
                         outputQueue.offer(receiveBuffer);
                     }
                 }

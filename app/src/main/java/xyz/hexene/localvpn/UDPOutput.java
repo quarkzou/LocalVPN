@@ -109,6 +109,13 @@ public class UDPOutput implements Runnable
 
                 try
                 {
+//                    try {
+//                        Thread.sleep(200);
+//                    }
+//                    catch (InterruptedException ex)
+//                    {
+//                        ex.printStackTrace();
+//                    }
                     ByteBuffer payloadBuffer = currentPacket.backingBuffer;
                     while (payloadBuffer.hasRemaining())
                         outputChannel.write(payloadBuffer);

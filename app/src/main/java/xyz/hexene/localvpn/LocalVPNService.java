@@ -97,7 +97,7 @@ public class LocalVPNService extends VpnService
         {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
-            builder.addRoute(VPN_ROUTE, 32);
+            builder.addRoute(VPN_ROUTE, 0);
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
         }
     }
@@ -176,6 +176,7 @@ public class LocalVPNService extends VpnService
 
             // vpnInput: app => vpn
             FileChannel vpnInput = new FileInputStream(vpnFileDescriptor).getChannel();
+            // vpnOutput: vpn => app???
             FileChannel vpnOutput = new FileOutputStream(vpnFileDescriptor).getChannel();
 
             try

@@ -160,7 +160,6 @@ public class TCPOutput implements Runnable
                     tcb.status = TCBStatus.SYN_SENT;
                     selector.wakeup();
                     tcb.selectionKey = outputChannel.register(selector, SelectionKey.OP_CONNECT, tcb);
-                    Log.i(TAG, "[tcb] " + tcb.toString());
                     return;
                 }
             }
@@ -250,6 +249,14 @@ public class TCPOutput implements Runnable
             // Forward to remote server
             try
             {
+                Log.i(TAG, String.format("ZYDEBUG, vpn=>remote, size=%d, header=%s", payloadSize, tcpHeader));
+//                try {
+//                    Thread.sleep(100);
+//                }
+//                catch (InterruptedException ex)
+//                {
+//                    ex.printStackTrace();
+//                }
                 while (payloadBuffer.hasRemaining())
                     outputChannel.write(payloadBuffer);
             }
@@ -265,6 +272,10 @@ public class TCPOutput implements Runnable
             tcb.theirAcknowledgementNum = tcpHeader.acknowledgementNumber;
             Packet referencePacket = tcb.referencePacket;
             referencePacket.updateTCPBuffer(responseBuffer, (byte) TCPHeader.ACK, tcb.mySequenceNum, tcb.myAcknowledgementNum, 0);
+
+            responseBuffer.flip();
+            Packet pResponse = new Packet(responseBuffer);
+            Log.i(TAG, String.format("ZYDEBUG, remote=>vpn, size=%d, header=%s", responseBuffer.position() - 40, pResponse.tcpHeader));
         }
         outputQueue.offer(responseBuffer);
     }
