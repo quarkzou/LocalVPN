@@ -236,7 +236,7 @@ public class LocalVPNService extends VpnService
                     // TODO: Sleep-looping is not very battery-friendly, consider blocking instead
                     // Confirm if throughput with ConcurrentQueue is really higher compared to BlockingQueue
                     if (!dataSent && !dataReceived)
-                        Thread.sleep(10);
+                        Thread.sleep(1);
                 }
             }
             catch (InterruptedException e)

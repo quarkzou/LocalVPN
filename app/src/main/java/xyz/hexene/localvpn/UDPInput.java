@@ -52,7 +52,7 @@ public class UDPInput implements Runnable
                 int readyChannels = selector.select();
 
                 if (readyChannels == 0) {
-                    Thread.sleep(10);
+                    Thread.sleep(1);
                     continue;
                 }
 

@@ -16,6 +16,7 @@
 
 package xyz.hexene.localvpn;
 
+import android.content.pm.PackageInfo;
 import android.util.Log;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class UDPOutput implements Runnable
@@ -55,12 +57,31 @@ public class UDPOutput implements Runnable
         this.vpnService = vpnService;
     }
 
+    private class PackageInfo
+    {
+        public Packet Pack;
+        public long InsertTick;
+
+        public PackageInfo(Packet pack, long insertTick)
+        {
+            Pack = pack;
+            InsertTick = insertTick;
+        }
+
+    }
+
+    private Queue<PackageInfo> m_outputQueue = new ConcurrentLinkedQueue<PackageInfo>();
+
+    private boolean m_drop = false;
+    private int m_dropNum = 30;
+
     @Override
     public void run()
     {
         Log.i(TAG, "Started");
         try
         {
+            int packIndex = 0;
 
             Thread currentThread = Thread.currentThread();
             while (true)
@@ -71,12 +92,33 @@ public class UDPOutput implements Runnable
                 {
                     currentPacket = inputQueue.poll();
                     if (currentPacket != null)
-                        break;
-                    Thread.sleep(10);
+                    {
+                        m_outputQueue.add(new PackageInfo(currentPacket, System.currentTimeMillis()));
+                    }
+
+                    PackageInfo pi = m_outputQueue.peek();
+                    if(pi != null)
+                    {
+                        long interval = System.currentTimeMillis() - pi.InsertTick;
+                        if(interval > 50) {
+                            currentPacket = m_outputQueue.poll().Pack;
+                            ++packIndex;
+                            if(packIndex == m_dropNum) {
+                                packIndex = 0;
+                                m_drop = !m_drop;
+                            }
+                            break;
+                        }
+                    }
+
+                    Thread.sleep(1);
                 } while (!currentThread.isInterrupted());
 
                 if (currentThread.isInterrupted())
                     break;
+
+                if(m_drop)
+                    continue;
 
                 InetAddress destinationAddress = currentPacket.ip4Header.destinationAddress;
                 int destinationPort = currentPacket.udpHeader.destinationPort;
@@ -111,6 +153,7 @@ public class UDPOutput implements Runnable
                 {
                     ByteBuffer payloadBuffer = currentPacket.backingBuffer;
                     Log.i(TAG, String.format("ZYDEBUG, vpn=>remote, size=%d, ip&port=%s", payloadBuffer.limit() - payloadBuffer.position(), ipAndPort));
+
                     while (payloadBuffer.hasRemaining())
                         outputChannel.write(payloadBuffer);
                 }
