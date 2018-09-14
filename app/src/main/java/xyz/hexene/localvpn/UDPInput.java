@@ -74,18 +74,18 @@ public class UDPInput implements Runnable
                         // XXX: We should handle any IOExceptions here immediately,
                         // but that probably won't happen with UDP
                         int readBytes = inputChannel.read(receiveBuffer);
-
+//
+//                        receiveBuffer.flip();
+//                        Packet p = new Packet(receiveBuffer);
+//                        Log.i(TAG, String.format("ZYDEBUG, remote=>vpn, size=%d, ip&port=%s:%d:%d", readBytes,
+//                                p.ip4Header.destinationAddress, p.udpHeader.destinationPort, p.udpHeader.sourcePort));
                         Packet referencePacket = (Packet) key.attachment();
                         referencePacket.updateUDPBuffer(receiveBuffer, readBytes);
                         receiveBuffer.position(HEADER_SIZE + readBytes);
+                        Log.i(TAG, String.format("ZYDEBUG, remote=>vpn, size=%d, ip&port=%s:%d:%d",
+                                readBytes, referencePacket.ip4Header.sourceAddress, referencePacket.udpHeader.sourcePort, referencePacket.udpHeader.destinationPort));
 
-//                        try {
-//                            Thread.sleep(10);
-//                        }
-//                        catch (InterruptedException ex)
-//                        {
-//                            ex.printStackTrace();
-//                        }
+
                         outputQueue.offer(receiveBuffer);
                     }
                 }

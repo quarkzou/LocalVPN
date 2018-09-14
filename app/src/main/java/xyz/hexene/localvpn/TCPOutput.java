@@ -85,29 +85,18 @@ public class TCPOutput implements Runnable
 
                 String ipAndPort = destinationAddress.getHostAddress() + ":" +
                         destinationPort + ":" + sourcePort;
-                String tcpType = "";
                 TCB tcb = TCB.getTCB(ipAndPort);
-                if (tcb == null) {
+                if (tcb == null)
                     initializeConnection(ipAndPort, destinationAddress, destinationPort,
                             currentPacket, tcpHeader, responseBuffer);
-                    tcpType = "tcb";
-                }
-                else {
-                    if (tcpHeader.isSYN()) {
-                        processDuplicateSYN(tcb, tcpHeader, responseBuffer);
-                        tcpType = "syn";
-                    } else if (tcpHeader.isRST()) {
-                        closeCleanly(tcb, responseBuffer);
-                        tcpType = "rst";
-                    } else if (tcpHeader.isFIN()) {
-                        processFIN(tcb, tcpHeader, responseBuffer);
-                        tcpType = "fin";
-                    } else if (tcpHeader.isACK()) {
-                        processACK(tcb, tcpHeader, payloadBuffer, responseBuffer);
-                        tcpType = "ack";
-                    }
-                    Log.i(TAG, String.format("[%s] %s",tcpType, tcb.toString()));
-                }
+                else if (tcpHeader.isSYN())
+                    processDuplicateSYN(tcb, tcpHeader, responseBuffer);
+                else if (tcpHeader.isRST())
+                    closeCleanly(tcb, responseBuffer);
+                else if (tcpHeader.isFIN())
+                    processFIN(tcb, tcpHeader, responseBuffer);
+                else if (tcpHeader.isACK())
+                    processACK(tcb, tcpHeader, payloadBuffer, responseBuffer);
 
                 // XXX: cleanup later
                 if (responseBuffer.position() == 0)
@@ -250,13 +239,6 @@ public class TCPOutput implements Runnable
             try
             {
                 Log.i(TAG, String.format("ZYDEBUG, vpn=>remote, size=%d, header=%s", payloadSize, tcpHeader));
-//                try {
-//                    Thread.sleep(100);
-//                }
-//                catch (InterruptedException ex)
-//                {
-//                    ex.printStackTrace();
-//                }
                 while (payloadBuffer.hasRemaining())
                     outputChannel.write(payloadBuffer);
             }
@@ -272,10 +254,6 @@ public class TCPOutput implements Runnable
             tcb.theirAcknowledgementNum = tcpHeader.acknowledgementNumber;
             Packet referencePacket = tcb.referencePacket;
             referencePacket.updateTCPBuffer(responseBuffer, (byte) TCPHeader.ACK, tcb.mySequenceNum, tcb.myAcknowledgementNum, 0);
-
-            responseBuffer.flip();
-            Packet pResponse = new Packet(responseBuffer);
-            Log.i(TAG, String.format("ZYDEBUG, remote=>vpn, size=%d, header=%s", responseBuffer.position() - 40, pResponse.tcpHeader));
         }
         outputQueue.offer(responseBuffer);
     }

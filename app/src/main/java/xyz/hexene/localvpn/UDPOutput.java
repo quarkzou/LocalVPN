@@ -109,14 +109,8 @@ public class UDPOutput implements Runnable
 
                 try
                 {
-//                    try {
-//                        Thread.sleep(200);
-//                    }
-//                    catch (InterruptedException ex)
-//                    {
-//                        ex.printStackTrace();
-//                    }
                     ByteBuffer payloadBuffer = currentPacket.backingBuffer;
+                    Log.i(TAG, String.format("ZYDEBUG, vpn=>remote, size=%d, ip&port=%s", payloadBuffer.limit() - payloadBuffer.position(), ipAndPort));
                     while (payloadBuffer.hasRemaining())
                         outputChannel.write(payloadBuffer);
                 }
